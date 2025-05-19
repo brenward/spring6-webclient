@@ -49,4 +49,11 @@ public class BeerClientImpl implements BeerClient {
             uriBuilder.path(BEER_PATH_ID).build(beerId)
         ).retrieve().bodyToMono(BeerDTO.class);
     }
+
+    @Override
+    public Flux<BeerDTO> getBeerByBeerStyle(String beerStyle) {
+        return webClient.get().uri(uriBuilder ->
+                uriBuilder.path(BEER_PATH).queryParam("beerStyle", beerStyle).build()
+        ).retrieve().bodyToFlux(BeerDTO.class);
+    }
 }
