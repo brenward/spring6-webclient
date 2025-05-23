@@ -4,8 +4,8 @@ import com.bwardweb.spring6_webclient.model.BeerDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -75,6 +75,31 @@ public class BeerClientImpl implements BeerClient {
                 .flatMap(responseEntity -> Mono.just(responseEntity.getHeaders().get("location").get(0)))
                 .map(path -> path.split("/")[path.split("/").length -1])
                 .flatMap(this::getBeerById);
+    }
+
+    @Override
+    public Mono<BeerDTO> updateBeer(BeerDTO beerDto) {
+        return webClient.put()
+                .uri(uriBuilder -> uriBuilder.path(BEER_PATH_ID).build(beerDto.getId()))
+                .body(Mono.just(beerDto), BeerDTO.class)
+                .retrieve().toBodilessEntity()
+                .flatMap(voidResponseEntity -> getBeerById(beerDto.getId()));
+    }
+
+    @Override
+    public Mono<BeerDTO> patchBeer(BeerDTO beerDto) {
+        return webClient.patch()
+                .uri(uriBuilder -> uriBuilder.path(BEER_PATH_ID).build(beerDto.getId()))
+                .body(Mono.just(beerDto), BeerDTO.class)
+                .retrieve().toBodilessEntity()
+                .flatMap(voidResponseEntity -> getBeerById(beerDto.getId()));
+    }
+
+    @Override
+    public Mono<Void> deleteBeer(String beerId) {
+        return webClient.delete()
+                .uri(uriBuilder -> uriBuilder.path(BEER_PATH_ID).build(beerId))
+                .retrieve().toBodilessEntity().then();
     }
 
 }

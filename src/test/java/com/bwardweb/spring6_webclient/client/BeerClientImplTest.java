@@ -128,6 +128,47 @@ class BeerClientImplTest {
             atomicBoolean.set(true);
         });
 
+        await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void testUpdateBeer(){
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        client.listBeersDTO().next().doOnNext(beerDto -> beerDto.setBeerName("Updated"))
+                .flatMap(beerDTO -> client.updateBeer(beerDTO))
+                .subscribe(beerDto -> {
+            System.out.println(beerDto.toString());
+            atomicBoolean.set(true);
+        });
+
+        await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void testPatchBeer(){
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        client.listBeersDTO().next().doOnNext(beerDto -> beerDto.setBeerName("Updated 2"))
+                .flatMap(beerDTO -> client.patchBeer(beerDTO))
+                .subscribe(beerDto -> {
+                    System.out.println(beerDto.toString());
+                    atomicBoolean.set(true);
+                });
+
+        await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void testDeleteBeer(){
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        client.listBeersDTO().next()
+                .flatMap(beerDTO -> client.deleteBeer(beerDTO.getId()))
+                .doOnSuccess(Void -> {
+                    System.out.println("Deleted");
+                    atomicBoolean.set(true);
+                }).subscribe();
 
         await().untilTrue(atomicBoolean);
     }
