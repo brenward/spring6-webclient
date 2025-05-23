@@ -8,6 +8,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static org.awaitility.Awaitility.await;
@@ -106,6 +107,27 @@ class BeerClientImplTest {
                     atomicBoolean.set(true);
                     throw new RuntimeException("My Error1: " + error.getMessage());
                 });
+
+        await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void testCreateBeer(){
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        BeerDTO newDto = BeerDTO.builder()
+                .beerName("Test Beer")
+                .beerStyle("IPA")
+                .upc("123456789012")
+                .price(new BigDecimal("12.99"))
+                .quantityOnHand(100)
+                .build();
+
+        client.createBeer(newDto).subscribe(beerDto -> {
+            System.out.println(beerDto.toString());
+            atomicBoolean.set(true);
+        });
+
 
         await().untilTrue(atomicBoolean);
     }
