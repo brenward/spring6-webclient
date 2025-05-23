@@ -1,9 +1,14 @@
 package com.bwardweb.spring6_webclient.client;
 
+import com.bwardweb.spring6_webclient.model.BeerDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static org.awaitility.Awaitility.await;
 
@@ -84,6 +89,22 @@ class BeerClientImplTest {
                 .subscribe(beerDto -> {
                     System.out.println(beerDto.toString());
                     atomicBoolean.set(true);
+                });
+
+        await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void testGetBeerByBeerStyle_NotFound(){
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        client.getBeerByBeerStyle("XXX")
+                .subscribe(beerDto -> {
+                    System.out.println(beerDto.toString());
+                    atomicBoolean.set(true);
+                },error -> {
+                    atomicBoolean.set(true);
+                    throw new RuntimeException("My Error1: " + error.getMessage());
                 });
 
         await().untilTrue(atomicBoolean);

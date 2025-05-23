@@ -2,7 +2,9 @@ package com.bwardweb.spring6_webclient.client;
 
 import com.bwardweb.spring6_webclient.model.BeerDTO;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -54,6 +56,13 @@ public class BeerClientImpl implements BeerClient {
     public Flux<BeerDTO> getBeerByBeerStyle(String beerStyle) {
         return webClient.get().uri(uriBuilder ->
                 uriBuilder.path(BEER_PATH).queryParam("beerStyle", beerStyle).build()
-        ).retrieve().bodyToFlux(BeerDTO.class);
+        ).exchangeToFlux(clientResponse -> {
+            if (clientResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
+                throw new RuntimeException("Beer style not found");
+            } else {
+                return clientResponse.bodyToFlux(BeerDTO.class);
+            }
+        });
     }
+
 }
